@@ -14,6 +14,8 @@ struct Particle {
     v_y: f64, // velocity in y-axis
     v_z: f64, // velocity in z-axis
     mass: f64, // mass of the particle
+
+    deorbited: bool
 }
 
 #[allow(dead_code)]
@@ -23,18 +25,73 @@ impl Particle {
         let a_y = f.1 / self.mass; 
         let a_z = f.2 / self.mass; 
 
-        return (a_x, a_y, a_z) 
+        return (a_x, a_y, a_z); 
+    }
+
+    fn particle_distance(&self, p2: &Particle) -> f64 { 
+        let r = ((p2.x - self.x).powf(2.0) + (p2.y - self.y).powf(2.0) + (p2.z - self.z).powf(2.0)).sqrt(); 
+        return r; 
+    }
+
+    fn distance_to_origin(&self) -> f64 { 
+        let r = (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)).sqrt(); 
+        return r; 
+    }
+
+    fn has_deorbited(&self) -> bool { 
+        let r: f64 = self.distance_to_origin(); 
+
+        let earth_surface_radius = 6371.*1000.; 
+
+        if r <= earth_surface_radius { 
+            return true; 
+        }
+        else { 
+            return false; 
+        }
     }
 
     #[allow(non_snake_case)]
-    fn force(&self, p2: &Particle) -> ((f64, f64, f64), (f64, f64, f64)){ 
+    fn gravity(&self, p2: &Particle) -> (f64, f64, f64){ 
         let G = 6.674e-11; 
         
-        let r = ((p2.x - self.x).powf(2.0) + (p2.y - self.y).powf(2.0) + (p2.z - self.z).powf(2.0)).sqrt(); 
+        let r = self.particle_distance(p2); 
         let F = G * self.mass * p2.mass / r.powf(2.0); 
 
         let (F_x, F_y, F_z): (f64, f64, f64) = (F * (p2.x - self.x)/r, F * (p2.y - self.y)/r, F * (p2.z - self.z)/r); 
-        return ((F_x, F_y, F_z), (-F_x, -F_y, -F_z)); 
+        return (F_x, F_y, F_z); 
+    }
+
+    #[allow(non_snake_case)]
+    fn drag(&self) -> (f64, f64, f64){ 
+
+        let earth_surface_radius = 6371.*1000.; 
+        let h: f64 = (self.distance_to_origin() - earth_surface_radius)/1000.; 
+
+        let T = 900. + 2.5 * (129.0 - 70.0) + 1.5 * 26.0; 
+        let m: f64 = 27. - 0.012 * (h - 200.0); 
+        let rho = 6e-10 * ((-h-175.)*m/T).exp(); 
+
+        let C_D = 0.5;  
+        let A = 0.5; 
+
+        let F_x = 0.5 * C_D * rho * A * self.v_x.powf(2.0); 
+        let F_y = 0.5 * C_D * rho * A * self.v_y.powf(2.0); 
+        let F_z = 0.5 * C_D * rho * A * self.v_z.powf(2.0); 
+
+        return (F_x, F_y, F_z); 
+    }
+
+    #[allow(non_snake_case)]
+    fn forces(&self, p2: &Particle) -> (f64, f64, f64){ 
+        let (F_x_grav, F_y_grav, F_z_grav) = self.gravity(p2);
+        let (F_x_drag, F_y_drag, F_z_drag) = self.drag(); 
+
+        let F_x = F_x_grav + F_x_drag; 
+        let F_y = F_y_grav + F_y_drag; 
+        let F_z = F_z_grav + F_z_drag; 
+
+        return (F_x, F_y, F_z); 
     }
 
     fn update_position(&mut self, dt: f64) { 
@@ -75,34 +132,33 @@ impl Particle {
 }
 
 fn velocity_verlet(p1: &mut Particle, p2: &mut Particle, dt: f64) { 
-    let (p1_force_t, p2_force_t)= p1.force(&p2); 
 
+    if p1.has_deorbited() { 
+        println!("{}", p1.name); 
+        p1.deorbited = true; 
+    }
+
+    let p1_force_t = p1.forces(&p2); 
     let p1_acceleration_t = p1.acceleration(p1_force_t); 
-    let p2_acceleration_t = p2.acceleration(p2_force_t); 
 
     p1.update_velocity(p1_acceleration_t, dt); 
-    p2.update_velocity(p2_acceleration_t, dt); 
-
     p1.update_position(dt); 
-    p2.update_position(dt); 
 
-    let (p1_force_tdt, p2_force_tdt)= p1.force(&p2); 
-
+    let p1_force_tdt= p1.gravity(&p2); 
     let p1_acceleration_tdt = p1.acceleration(p1_force_tdt); 
-    let p2_acceleration_tdt = p2.acceleration(p2_force_tdt); 
 
     p1.update_velocity(p1_acceleration_tdt, dt); 
-    p2.update_velocity(p2_acceleration_tdt, dt); 
 }
 
 fn main(){
 
     // Parameters 
     let number_particles: i64 = 50; 
-    let maximum_velocity = 300.0; 
+    let maximum_velocity = 300.; 
 
     let mut t = 0.0; 
-    let t_end = 2.0 * 4865. + 500.; 
+    let t_end = 50000.0 * 95. * 60. + 500.; 
+    // let t_end = 95.0 * 60.0; 
     let dt = 10e-0; 
 
     // Initializing all the objects. 
@@ -115,6 +171,7 @@ fn main(){
         v_y: 0.0,
         v_z: 0.0,
         mass: 5.972e24,
+        deorbited: false
     }; 
 
     let mut object_vector: Vec<Particle> = Vec::new(); 
@@ -131,7 +188,8 @@ fn main(){
             v_x: 0.0 + 2.0 * (rng.gen::<f64>() - 0.5) * maximum_velocity,
             v_y: 7700.0 + 2.0 * (rng.gen::<f64>() - 0.5) * maximum_velocity, 
             v_z: 0.0,
-            mass: 100.0,
+            mass: 1.0,
+            deorbited: false
             }; 
 
             default_particle.init(); 
@@ -142,7 +200,10 @@ fn main(){
     while t < t_end {
 
         for mut particle in object_vector.iter_mut() { 
-            velocity_verlet(&mut earth, &mut particle, dt); 
+            if particle.deorbited { 
+                continue; 
+            }
+            velocity_verlet(&mut particle, &mut earth, dt); 
             particle.write(t); 
         }
 

@@ -9,12 +9,15 @@ particle_file_paths = Path("results/data").glob("**/*")
 has_legend = False
 legend_list = []
 
-plotting_period = 1000
-starting_time = 5000
-end_time = 1000000
+plotting_period = 500
+starting_time = 0
+end_time = 5000
 
 for particle_file in particle_file_paths:
     df = pd.read_csv(particle_file)
+
+    # plt.plot(df["x"], df["y"], "-x")
+    # plt.show()
 
     df = df[
         (df["t"] >= starting_time)
