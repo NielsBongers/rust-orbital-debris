@@ -22,8 +22,8 @@ We see the debris starts in a densely packed cloud (500 - 1000), then shifts int
 
 ### First orbit
 
-<img align="center" src="https://raw.githubusercontent.com/NielsBongers/rust-orbital-debris/main/results/figures/example_simulation_result.png?token=GHSAT0AAAAAACDVXV2YKCS3V2AS2CH73XZUZHLKYCQ" width="500"> 
+<img align="center" src="https://raw.githubusercontent.com/NielsBongers/rust-orbital-debris/main/results/figures/example_simulation_result.png" width="500"> 
 
 ### Second orbit
 
-<img align="center" src="https://raw.githubusercontent.com/NielsBongers/rust-orbital-debris/main/results/figures/example_simulation_result_longer_run.png?token=GHSAT0AAAAAACDVXV2Y4HLHO7GFFK3BRUYOZHLK54A" width="500"> 
+<img align="center" src="https://raw.githubusercontent.com/NielsBongers/rust-orbital-debris/main/results/figures/example_simulation_result_longer_run.png" width="500"> 
