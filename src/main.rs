@@ -1,10 +1,12 @@
 
+use std::default;
 #[allow(dead_code)]
 #[allow(unused_variables)]
 
 use std::fs::File; 
 use std::fs::OpenOptions; 
 use std::io::Write; 
+use rand::Rng; 
 
 struct Particle {
 
@@ -114,44 +116,42 @@ fn main(){
         mass: 5.972e24,
     }; 
 
-    let mut iss = Particle { 
-        name: String::from("ISS"), 
+    let mut object_vector: Vec<Particle> = Vec::new(); 
 
-        x: 6371000.0 + 413000.0, 
-        y: 0.0,
-        z: 0.0,
-        v_x: 0.0,
-        v_y: 7700.0,
-        v_z: 0.0,
-        mass: 100.0,
-    }; 
+    let number_particles: i64 = 10; 
 
-    let mut sat = Particle { 
-        name: String::from("Satellite"), 
+    let mut rng = rand::thread_rng();
 
-        x: 6371000.0 + 413000.0, 
-        y: 0.0,
-        z: 0.0,
-        v_x: 0.0,
-        v_y: -7700.0,
-        v_z: 0.0,
-        mass: 100.0,
-    }; 
+    for i in 0..number_particles { 
+
+        let mut default_particle: Particle = Particle { 
+            name: format!("particle {}", i.to_string()), 
+
+            x: 6371000.0 + 413000.0, 
+            y: 0.0,
+            z: 0.0,
+            v_x: 0.0 + rng.gen::<f64>() * 300.,
+            v_y: 7700.0 + rng.gen::<f64>() * 300., 
+            v_z: 0.0,
+            mass: 100.0,
+            }; 
+
+            default_particle.init(); 
+            object_vector.push(default_particle)
+    }
 
     earth.init(); 
-    iss.init(); 
-    sat.init(); 
 
     let mut t = 0.0; 
-    let t_end = 5645.; 
+    let t_end = 4865.; 
     let dt = 10e-0; 
 
     while t < t_end {
-        euler_integration(&mut earth, &mut iss, dt); 
-        euler_integration(&mut earth, &mut sat, dt); 
-        earth.write(t); 
-        iss.write(t); 
-        sat.write(t); 
+
+        for mut particle in object_vector.iter_mut() { 
+            euler_integration(&mut earth, &mut particle, dt); 
+            particle.write(t); 
+        }
 
         t += dt; 
     } 
