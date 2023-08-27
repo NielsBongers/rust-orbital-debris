@@ -2,6 +2,10 @@
 #[allow(dead_code)]
 #[allow(unused_variables)]
 
+use std::fs::File; 
+use std::fs::OpenOptions; 
+use std::io::Write; 
+
 struct Particle {
 
     name: String,
@@ -56,16 +60,28 @@ impl Particle {
 
     fn describe(&self) { 
         println!(
-                r"Particle name: {}, Position: {}, {}, {}, Velocity: {}, {}, {}, Mass: {}", 
+                r"Particle name: {}, Position: {}, {}, {}, Velocity: {}, {}, {}, Mass: {}\n", 
                 self.name, self.x, self.y, self.z, self.v_x, self.v_y, self.v_z, self.mass); 
+    }
+
+    fn init(&self) { 
+        // Emptying the file before writing and adding a header. 
+        let file_name = format!("{}.txt", self.name); 
+        let mut file = File::create(file_name).unwrap();
+        write!(file, "t,x,y,z,v_x,v_y,v_z,mass\n").unwrap(); 
+    }
+
+    fn write(&self, t: f64) { 
+        let file_name = format!("results/{}.txt", self.name); 
+        let mut file = OpenOptions::new().append(true).write(true).create(true).open(file_name).unwrap(); 
+
+        write!(file, "{}, {},{},{},{},{},{},{}\n", 
+                t, self.x, self.y, self.z, self.v_x, self.v_y, self.v_z, self.mass).unwrap(); 
     }
 
 }
 
-fn euler_integration(p1: &mut Particle, p2: &mut Particle) { 
-
-    let dt = 10e-3; 
-
+fn euler_integration(p1: &mut Particle, p2: &mut Particle, dt: f64) { 
     let (p1_force, p2_force)= p1.force(&p2); 
 
     let p1_acceleration = p1.acceleration(p1_force); 
@@ -84,7 +100,7 @@ fn main(){
         v_x: 0.0,
         v_y: 0.0,
         v_z: 0.0,
-        mass: 1.0,
+        mass: 10e-5,
     }; 
 
     let mut p2 = Particle { 
@@ -96,10 +112,21 @@ fn main(){
         v_x: 0.0,
         v_y: 0.0,
         v_z: 0.0,
-        mass: 1.0,
+        mass: 10e10,
     }; 
 
-    euler_integration(&mut p1, &mut p2)
+    p1.init(); 
+    p2.init(); 
 
+    let mut t = 0.0; 
+    let dt = 10e-3; 
+
+    for _i in 0..10 { 
+        euler_integration(&mut p1, &mut p2, dt); 
+        p1.write(t); 
+        p2.write(t); 
+
+        t += dt; 
+    } 
     
 }
