@@ -62,7 +62,7 @@ impl Particle {
 
 }
 
-fn velocity_verlet(p1: &mut Particle, p2: &mut Particle) { 
+fn euler_integration(p1: &mut Particle, p2: &mut Particle) { 
 
     let dt = 10e-3; 
 
@@ -99,7 +99,7 @@ fn main(){
         mass: 1.0,
     }; 
 
-    velocity_verlet(&mut p1, &mut p2)
+    euler_integration(&mut p1, &mut p2)
 
     
 }
