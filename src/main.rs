@@ -128,8 +128,8 @@ fn main(){
             x: 6371000.0 + 413000.0, 
             y: 0.0,
             z: 0.0,
-            v_x: 0.0 + rng.gen::<f64>() * maximum_velocity,
-            v_y: 7700.0 + rng.gen::<f64>() * maximum_velocity, 
+            v_x: 0.0 + 2.0 * (rng.gen::<f64>() - 0.5) * maximum_velocity,
+            v_y: 7700.0 + 2.0 * (rng.gen::<f64>() - 0.5) * maximum_velocity, 
             v_z: 0.0,
             mass: 100.0,
             }; 

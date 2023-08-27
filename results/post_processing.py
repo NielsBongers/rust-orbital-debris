@@ -11,11 +11,16 @@ legend_list = []
 
 plotting_period = 1000
 starting_time = 5000
+end_time = 1000000
 
 for particle_file in particle_file_paths:
     df = pd.read_csv(particle_file)
 
-    df = df[(df["t"] >= starting_time) & (df["t"] % plotting_period == 0)]
+    df = df[
+        (df["t"] >= starting_time)
+        & (df["t"] <= end_time)
+        & (df["t"] % plotting_period == 0)
+    ]
 
     for index, row in df.iterrows():
         if not has_legend:

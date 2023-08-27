@@ -16,7 +16,7 @@ We already get some interesting results. I would like to analyze these, to see t
 
 ## Example results 
 
-50 pieces of orbital debris, starting with roughly the ISS' orbital parameters, but with random $\Delta v_x$ and $\Delta v_y$ (uniform, between 0 and 300 m/s) increments, starting on the right-hand side. 
+50 pieces of orbital debris, starting with roughly the ISS' orbital parameters, but with random $\Delta v_x$ and $\Delta v_y$ (uniform, between 0 and 300 m/s, always positive because that gives nicer plots), plotted with increments of 500 seconds, starting on the right-hand side. 
 
 We see the debris starts in a densely packed cloud (500 - 1000), then shifts into highly stretched lines, particularly visible in the second orbit. We can see some of it increases in orbital height significantly, while others get close to the surface of the Earth. 
 
