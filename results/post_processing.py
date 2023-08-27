@@ -9,10 +9,13 @@ particle_file_paths = Path("results/data").glob("**/*")
 has_legend = False
 legend_list = []
 
+plotting_period = 1000
+starting_time = 5000
+
 for particle_file in particle_file_paths:
     df = pd.read_csv(particle_file)
 
-    df = df[(df["t"] >= 0) & (df["t"] % 500 == 0)]
+    df = df[(df["t"] >= starting_time) & (df["t"] % plotting_period == 0)]
 
     for index, row in df.iterrows():
         if not has_legend:
@@ -29,7 +32,7 @@ plt.gcf().gca().add_artist(earth)
 plt.xlim([-10e6, 10e6])
 plt.ylim([-10e6, 10e6])
 plt.gca().set_aspect("equal")
-plt.axis("off")
+# plt.axis("off")
 plt.title("Orbital debris")
 plt.legend(
     legend_list,

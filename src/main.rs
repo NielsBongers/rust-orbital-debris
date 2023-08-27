@@ -102,7 +102,7 @@ fn main(){
     let maximum_velocity = 300.0; 
 
     let mut t = 0.0; 
-    let t_end = 4865. + 500.; 
+    let t_end = 2.0 * 4865. + 500.; 
     let dt = 10e-0; 
 
     // Initializing all the objects. 
