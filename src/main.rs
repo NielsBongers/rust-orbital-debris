@@ -26,7 +26,9 @@ impl Particle {
         let a_y = f.1 / self.mass; 
         let a_z = f.2 / self.mass; 
 
-        println!("Acceleration: {}, {}, {}", a_x, a_y, a_z); 
+        // if self.name == "ISS" {
+        //     println!("Acceleration: {}, {}, {}", a_x, a_y, a_z); 
+        // }
 
         return (a_x, a_y, a_z) 
     }
@@ -45,8 +47,6 @@ impl Particle {
     fn update(&mut self, acceleration: (f64, f64, f64), dt: f64) { 
         let (a_x, a_y, a_z) = acceleration; 
 
-        self.describe(); 
-
         self.v_x += a_x * dt; 
         self.v_y += a_y * dt; 
         self.v_z += a_z * dt; 
@@ -55,7 +55,7 @@ impl Particle {
         self.y += self.v_y * dt; 
         self.z += self.v_z * dt; 
 
-        self.describe(); 
+        // self.describe(); 
     }
 
     fn describe(&self) { 
@@ -66,13 +66,13 @@ impl Particle {
 
     fn init(&self) { 
         // Emptying the file before writing and adding a header. 
-        let file_name = format!("{}.txt", self.name); 
+        let file_name = format!("results/data/{}.csv", self.name); 
         let mut file = File::create(file_name).unwrap();
         write!(file, "t,x,y,z,v_x,v_y,v_z,mass\n").unwrap(); 
     }
 
     fn write(&self, t: f64) { 
-        let file_name = format!("results/{}.txt", self.name); 
+        let file_name = format!("results/data/{}.csv", self.name); 
         let mut file = OpenOptions::new().append(true).write(true).create(true).open(file_name).unwrap(); 
 
         write!(file, "{}, {},{},{},{},{},{},{}\n", 
@@ -93,40 +93,46 @@ fn euler_integration(p1: &mut Particle, p2: &mut Particle, dt: f64) {
 
 fn main(){
     let mut p1 = Particle { 
-        name: String::from("First"), 
-        x: 1.0,
-        y: 0.0,
-        z: 0.0,
-        v_x: 0.0,
-        v_y: 0.0,
-        v_z: 0.0,
-        mass: 10e-5,
-    }; 
-
-    let mut p2 = Particle { 
-        name: String::from("Second"), 
-
+        name: String::from("Earth"), 
         x: 0.0,
         y: 0.0,
         z: 0.0,
         v_x: 0.0,
         v_y: 0.0,
         v_z: 0.0,
-        mass: 10e10,
+        mass: 5.972e24,
+    }; 
+
+    let mut p2 = Particle { 
+        name: String::from("ISS"), 
+
+        x: 6371.0*1000.0 + 413000.0, 
+        y: 0.0,
+        z: 0.0,
+        v_x: 0.0,
+        v_y: 7700.0,
+        v_z: 0.0,
+        mass: 100.0,
     }; 
 
     p1.init(); 
     p2.init(); 
 
     let mut t = 0.0; 
-    let dt = 10e-3; 
+    let t_end = 5400.; 
+    let dt = 10e-2; 
 
-    for _i in 0..10 { 
+    while t < t_end {
         euler_integration(&mut p1, &mut p2, dt); 
         p1.write(t); 
         p2.write(t); 
 
         t += dt; 
     } 
+
+    let mut cmd = std::process::Command::new("C:\\Program Files\\Python310\\python.exe");
+    cmd.arg("D:\\Google Drive\\Rust\\velocity_verlet\\results\\post_processing.py"); 
+    
+    cmd.output().unwrap(); 
     
 }
