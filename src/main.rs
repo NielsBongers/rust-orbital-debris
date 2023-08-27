@@ -44,18 +44,18 @@ impl Particle {
         return ((F_x, F_y, F_z), (-F_x, -F_y, -F_z)); 
     }
 
-    fn update(&mut self, acceleration: (f64, f64, f64), dt: f64) { 
-        let (a_x, a_y, a_z) = acceleration; 
-
-        self.v_x += a_x * dt; 
-        self.v_y += a_y * dt; 
-        self.v_z += a_z * dt; 
-
+    fn update_position(&mut self, dt: f64) { 
         self.x += self.v_x * dt; 
         self.y += self.v_y * dt; 
         self.z += self.v_z * dt; 
+    }
 
-        // self.describe(); 
+    fn update_velocity(&mut self, acceleration: (f64, f64, f64), dt: f64) { 
+        let (a_x, a_y, a_z) = acceleration; 
+
+        self.v_x += 0.5 * a_x * dt; 
+        self.v_y += 0.5 * a_y * dt; 
+        self.v_z += 0.5 * a_z * dt; 
     }
 
     fn describe(&self) { 
@@ -82,17 +82,28 @@ impl Particle {
 }
 
 fn euler_integration(p1: &mut Particle, p2: &mut Particle, dt: f64) { 
-    let (p1_force, p2_force)= p1.force(&p2); 
+    let (p1_force_t, p2_force_t)= p1.force(&p2); 
 
-    let p1_acceleration = p1.acceleration(p1_force); 
-    let p2_acceleration = p2.acceleration(p2_force); 
+    let p1_acceleration_t = p1.acceleration(p1_force_t); 
+    let p2_acceleration_t = p2.acceleration(p2_force_t); 
 
-    p1.update(p1_acceleration, dt); 
-    p2.update(p2_acceleration, dt); 
+    p1.update_velocity(p1_acceleration_t, dt); 
+    p2.update_velocity(p2_acceleration_t, dt); 
+
+    p1.update_position(dt); 
+    p2.update_position(dt); 
+
+    let (p1_force_tdt, p2_force_tdt)= p1.force(&p2); 
+
+    let p1_acceleration_tdt = p1.acceleration(p1_force_tdt); 
+    let p2_acceleration_tdt = p2.acceleration(p2_force_tdt); 
+
+    p1.update_velocity(p1_acceleration_tdt, dt); 
+    p2.update_velocity(p2_acceleration_tdt, dt); 
 }
 
 fn main(){
-    let mut p1 = Particle { 
+    let mut earth = Particle { 
         name: String::from("Earth"), 
         x: 0.0,
         y: 0.0,
@@ -103,10 +114,10 @@ fn main(){
         mass: 5.972e24,
     }; 
 
-    let mut p2 = Particle { 
+    let mut iss = Particle { 
         name: String::from("ISS"), 
 
-        x: 6371.0*1000.0 + 413000.0, 
+        x: 6371000.0 + 413000.0, 
         y: 0.0,
         z: 0.0,
         v_x: 0.0,
@@ -115,17 +126,32 @@ fn main(){
         mass: 100.0,
     }; 
 
-    p1.init(); 
-    p2.init(); 
+    let mut sat = Particle { 
+        name: String::from("Satellite"), 
+
+        x: 6371000.0 + 413000.0, 
+        y: 0.0,
+        z: 0.0,
+        v_x: 0.0,
+        v_y: -7700.0,
+        v_z: 0.0,
+        mass: 100.0,
+    }; 
+
+    earth.init(); 
+    iss.init(); 
+    sat.init(); 
 
     let mut t = 0.0; 
-    let t_end = 5400.; 
-    let dt = 10e-2; 
+    let t_end = 5645.; 
+    let dt = 10e-0; 
 
     while t < t_end {
-        euler_integration(&mut p1, &mut p2, dt); 
-        p1.write(t); 
-        p2.write(t); 
+        euler_integration(&mut earth, &mut iss, dt); 
+        euler_integration(&mut earth, &mut sat, dt); 
+        earth.write(t); 
+        iss.write(t); 
+        sat.write(t); 
 
         t += dt; 
     } 
