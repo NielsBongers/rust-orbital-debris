@@ -1,15 +1,10 @@
 
-use std::default;
-#[allow(dead_code)]
-#[allow(unused_variables)]
-
 use std::fs::File; 
 use std::fs::OpenOptions; 
 use std::io::Write; 
 use rand::Rng; 
 
 struct Particle {
-
     name: String,
 
     x: f64, // position in x-axis
@@ -27,10 +22,6 @@ impl Particle {
         let a_x = f.0 / self.mass; 
         let a_y = f.1 / self.mass; 
         let a_z = f.2 / self.mass; 
-
-        // if self.name == "ISS" {
-        //     println!("Acceleration: {}, {}, {}", a_x, a_y, a_z); 
-        // }
 
         return (a_x, a_y, a_z) 
     }
@@ -83,7 +74,7 @@ impl Particle {
 
 }
 
-fn euler_integration(p1: &mut Particle, p2: &mut Particle, dt: f64) { 
+fn velocity_verlet(p1: &mut Particle, p2: &mut Particle, dt: f64) { 
     let (p1_force_t, p2_force_t)= p1.force(&p2); 
 
     let p1_acceleration_t = p1.acceleration(p1_force_t); 
@@ -105,6 +96,16 @@ fn euler_integration(p1: &mut Particle, p2: &mut Particle, dt: f64) {
 }
 
 fn main(){
+
+    // Parameters 
+    let number_particles: i64 = 50; 
+    let maximum_velocity = 300.0; 
+
+    let mut t = 0.0; 
+    let t_end = 4865. + 500.; 
+    let dt = 10e-0; 
+
+    // Initializing all the objects. 
     let mut earth = Particle { 
         name: String::from("Earth"), 
         x: 0.0,
@@ -117,48 +118,42 @@ fn main(){
     }; 
 
     let mut object_vector: Vec<Particle> = Vec::new(); 
-
-    let number_particles: i64 = 10; 
-
     let mut rng = rand::thread_rng();
 
     for i in 0..number_particles { 
 
-        let mut default_particle: Particle = Particle { 
+        let default_particle: Particle = Particle { 
             name: format!("particle {}", i.to_string()), 
 
             x: 6371000.0 + 413000.0, 
             y: 0.0,
             z: 0.0,
-            v_x: 0.0 + rng.gen::<f64>() * 300.,
-            v_y: 7700.0 + rng.gen::<f64>() * 300., 
+            v_x: 0.0 + rng.gen::<f64>() * maximum_velocity,
+            v_y: 7700.0 + rng.gen::<f64>() * maximum_velocity, 
             v_z: 0.0,
             mass: 100.0,
             }; 
 
             default_particle.init(); 
             object_vector.push(default_particle)
-    }
+    } 
 
-    earth.init(); 
-
-    let mut t = 0.0; 
-    let t_end = 4865.; 
-    let dt = 10e-0; 
-
+    // Running the simulation. 
     while t < t_end {
 
         for mut particle in object_vector.iter_mut() { 
-            euler_integration(&mut earth, &mut particle, dt); 
+            velocity_verlet(&mut earth, &mut particle, dt); 
             particle.write(t); 
         }
 
         t += dt; 
     } 
 
+    // Visualizing using Python. 
     let mut cmd = std::process::Command::new("C:\\Program Files\\Python310\\python.exe");
     cmd.arg("D:\\Google Drive\\Rust\\velocity_verlet\\results\\post_processing.py"); 
-    
     cmd.output().unwrap(); 
+
+    println!("Done!"); 
     
 }
