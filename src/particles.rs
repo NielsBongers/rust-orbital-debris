@@ -71,7 +71,7 @@ impl Particle {
         let h: f64 = (self.distance_to_origin() - earth_surface_radius) / 1000.;
 
         let T = 900. + 2.5 * (129.0 - 70.0) + 1.5 * 26.0;
-        let m: f64 = 27. - 0.012 * (h - 200.0);
+        let m = 27. - 0.012 * (h - 200.0);
         let rho = 6e-10 * ((-h - 175.) * m / T).exp();
 
         let C_D = 0.5;
