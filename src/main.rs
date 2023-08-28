@@ -211,9 +211,9 @@ fn main(){
     } 
 
     // Visualizing using Python. 
-    let mut cmd = std::process::Command::new("C:\\Program Files\\Python310\\python.exe");
-    cmd.arg("D:\\Google Drive\\Rust\\velocity_verlet\\results\\post_processing.py"); 
-    cmd.output().unwrap(); 
+    // let mut cmd = std::process::Command::new("C:\\Program Files\\Python310\\python.exe");
+    // cmd.arg("D:\\Google Drive\\Rust\\velocity_verlet\\results\\post_processing.py"); 
+    // cmd.output().unwrap(); 
 
     println!("Done!"); 
     
