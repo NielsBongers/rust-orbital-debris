@@ -1,4 +1,4 @@
-
+use std::fs; 
 use std::fs::File; 
 use std::fs::OpenOptions; 
 use std::io::Write; 
@@ -116,6 +116,7 @@ impl Particle {
 
     fn init(&self) { 
         // Emptying the file before writing and adding a header. 
+        fs::create_dir_all("results/data").unwrap(); 
         let file_name = format!("results/data/{}.csv", self.name); 
         let mut file = File::create(file_name).unwrap();
         write!(file, "t,x,y,z,v_x,v_y,v_z,mass\n").unwrap(); 
