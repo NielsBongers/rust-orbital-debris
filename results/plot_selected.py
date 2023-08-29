@@ -5,7 +5,7 @@ from pathlib import Path
 
 particle_file_paths = Path("results/data").glob("**/*")
 
-selected_names = ["particle 46"]
+selected_names = ["particle 287"]
 
 for particle_file in particle_file_paths:
     print(particle_file.stem in "".join(selected_names))
@@ -30,8 +30,8 @@ plt.title("Orbital debris")
 #     bbox_to_anchor=(1.45, 1),
 # )
 plt.tight_layout()
-plt.savefig(
-    "results/figures/27082023 - Rust orbital debris - almost a full orbit.png",
-    dpi=300,
-)
+# plt.savefig(
+#     "results/figures/27082023 - Rust orbital debris - more results.png",
+#     dpi=300,
+# )
 plt.show()

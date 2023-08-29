@@ -1,7 +1,7 @@
 /target
 
 *.txt
-/results/data 
+/results/data/*.csv
 *.png 
 !example_simulation_result.png 
 !example_simulation_result_longer_run.png 
